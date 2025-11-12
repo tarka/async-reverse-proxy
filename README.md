@@ -54,7 +54,7 @@ and will proxy these calls:
 
 * All other URLs will be handled by `debug_request` function, that will display request information.
 
-```rust
+```rust,no_run
 use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server, StatusCode};
