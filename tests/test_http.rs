@@ -4,7 +4,7 @@ use hyper::header::{CONNECTION, HOST, UPGRADE};
 use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Client, HeaderMap, Request, Response, Server, StatusCode, Uri};
-use hyper_reverse_proxy::ReverseProxy;
+use async_reverse_proxy::ReverseProxy;
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::LazyLock;

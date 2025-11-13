@@ -1,5 +1,5 @@
 [package]
-name = "hyper-reverse-proxy"
+name = "async-reverse-proxy"
 version = "0.5.2-dev"
 authors = [
   "Brendan Zabarauskas <bjzaba@yahoo.com.au>",

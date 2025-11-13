@@ -10,7 +10,7 @@ use hyper::{
     service::{make_service_fn, service_fn},
     Body, Request, Response, Server,
 };
-use hyper_reverse_proxy::ReverseProxy;
+use async_reverse_proxy::ReverseProxy;
 use test_context::{test_context, AsyncTestContext};
 use tokio::{net::TcpListener, sync::oneshot::Sender, task::JoinHandle};
 use tokiotest_httpserver::take_port;
