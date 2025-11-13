@@ -4,15 +4,14 @@ use hyper::{Body, Request, Response, Server, StatusCode};
 use hyper_reverse_proxy::ReverseProxy;
 use hyper_trust_dns::{RustlsHttpsConnector, TrustDnsResolver};
 use std::net::IpAddr;
+use std::sync::LazyLock;
 use std::{convert::Infallible, net::SocketAddr};
 
-lazy_static::lazy_static! {
-    static ref  PROXY_CLIENT: ReverseProxy<RustlsHttpsConnector> = {
-        ReverseProxy::new(
-            hyper::Client::builder().build::<_, hyper::Body>(TrustDnsResolver::default().into_rustls_webpki_https_connector()),
-        )
-    };
-}
+static PROXY_CLIENT: LazyLock<ReverseProxy<RustlsHttpsConnector>> = LazyLock::new(|| {
+    ReverseProxy::new(
+        hyper::Client::builder().build::<_, hyper::Body>(TrustDnsResolver::default().into_rustls_webpki_https_connector()),
+    )
+});
 
 fn debug_request(req: &Request<Body>) -> Result<Response<Body>, Infallible> {
     let body_str = format!("{:?}", req);

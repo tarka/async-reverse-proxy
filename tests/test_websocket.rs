@@ -1,8 +1,5 @@
 use std::{
-    convert::Infallible,
-    net::{IpAddr, SocketAddr},
-    process::exit,
-    time::Duration,
+    convert::Infallible, net::{IpAddr, SocketAddr}, process::exit, sync::LazyLock, time::Duration
 };
 
 use async_tungstenite::tokio::{accept_async, connect_async};
@@ -20,13 +17,9 @@ use tokiotest_httpserver::take_port;
 use tungstenite::Message;
 use url::Url;
 
-lazy_static::lazy_static! {
-    static ref  PROXY_CLIENT: ReverseProxy<HttpConnector<GaiResolver>> = {
-        ReverseProxy::new(
-            hyper::Client::new(),
-        )
-    };
-}
+static PROXY_CLIENT: LazyLock<ReverseProxy<HttpConnector<GaiResolver>>> = LazyLock::new(|| {
+    ReverseProxy::new(hyper::Client::new())
+});
 
 struct ProxyTestContext {
     sender: Sender<()>,

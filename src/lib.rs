@@ -8,18 +8,23 @@ use hyper::http::header::{InvalidHeaderValue, ToStrError};
 use hyper::http::uri::InvalidUri;
 use hyper::upgrade::OnUpgrade;
 use hyper::{Body, Client, Error, Request, Response, StatusCode};
-use lazy_static::lazy_static;
 use std::net::IpAddr;
+use std::sync::LazyLock;
 use tokio::io::copy_bidirectional;
 
-lazy_static! {
-    static ref TE_HEADER: HeaderName = HeaderName::from_static("te");
-    static ref CONNECTION_HEADER: HeaderName = HeaderName::from_static("connection");
-    static ref UPGRADE_HEADER: HeaderName = HeaderName::from_static("upgrade");
-    static ref TRAILER_HEADER: HeaderName = HeaderName::from_static("trailer");
-    static ref TRAILERS_HEADER: HeaderName = HeaderName::from_static("trailers");
-    // A list of the headers, using hypers actual HeaderName comparison
-    static ref HOP_HEADERS: [HeaderName; 9] = [
+static TE_HEADER: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("te"));
+static CONNECTION_HEADER: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("connection"));
+static UPGRADE_HEADER: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("upgrade"));
+static TRAILER_HEADER: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("trailer"));
+static TRAILERS_HEADER: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("trailers"));
+// A list of the headers, using hypers actual HeaderName comparison
+static HOP_HEADERS: LazyLock<[HeaderName; 9]> =
+    LazyLock::new(|| [
         CONNECTION_HEADER.clone(),
         TE_HEADER.clone(),
         TRAILER_HEADER.clone(),
@@ -29,10 +34,9 @@ lazy_static! {
         HeaderName::from_static("proxy-authorization"),
         HeaderName::from_static("transfer-encoding"),
         HeaderName::from_static("upgrade"),
-    ];
-
-    static ref X_FORWARDED_FOR: HeaderName = HeaderName::from_static("x-forwarded-for");
-}
+    ]);
+static X_FORWARDED_FOR: LazyLock<HeaderName> =
+    LazyLock::new(|| HeaderName::from_static("x-forwarded-for"));
 
 #[derive(Debug)]
 pub enum ProxyError {

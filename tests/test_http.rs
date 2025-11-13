@@ -7,6 +7,7 @@ use hyper::{Body, Client, HeaderMap, Request, Response, Server, StatusCode, Uri}
 use hyper_reverse_proxy::ReverseProxy;
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
+use std::sync::LazyLock;
 use test_context::test_context;
 use test_context::AsyncTestContext;
 use tokio::sync::oneshot::Sender;
@@ -14,13 +15,9 @@ use tokio::task::JoinHandle;
 use tokiotest_httpserver::handler::HandlerBuilder;
 use tokiotest_httpserver::{take_port, HttpTestContext};
 
-lazy_static::lazy_static! {
-    static ref  PROXY_CLIENT: ReverseProxy<HttpConnector<GaiResolver>> = {
-        ReverseProxy::new(
-            hyper::Client::new(),
-        )
-    };
-}
+static PROXY_CLIENT: LazyLock<ReverseProxy<HttpConnector<GaiResolver>>> = LazyLock::new(|| {
+    ReverseProxy::new(hyper::Client::new())
+});
 
 struct ProxyTestContext {
     sender: Sender<()>,
