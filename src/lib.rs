@@ -3,6 +3,7 @@
 #[macro_use]
 extern crate tracing;
 
+use cfg_if::cfg_if;
 use hyper::header::{HeaderMap, HeaderName, HeaderValue, HOST};
 use hyper::http::header::{InvalidHeaderValue, ToStrError};
 use hyper::http::uri::InvalidUri;
@@ -77,6 +78,24 @@ fn remove_hop_headers(headers: &mut HeaderMap) {
     for header in &*HOP_HEADERS {
         headers.remove(header);
     }
+}
+
+fn spawn<T: Send + 'static>(future: impl Future<Output = T> + Send + 'static) {
+    cfg_if! {
+        if #[cfg(feature = "smol")] {
+            smol::spawn(future)
+                .detach();
+
+        } else if #[cfg(feature = "tokio")] {
+            tokio::spawn(future);
+        }
+    }
+
+    // NOTE: This also works, and could be a fallback for other runtimes?
+    //
+    // let _join = thread::spawn(|| {
+    //     pollster::block_on(future);
+    // });
 }
 
 fn get_upgrade_type(headers: &HeaderMap) -> Option<String> {
@@ -319,7 +338,7 @@ pub async fn call<'a, T: hyper::client::connect::Connect + Clone + Send + Sync +
 
                 debug!("Responding to a connection upgrade response");
 
-                tokio::spawn(async move {
+                spawn(async move {
                     let mut request_upgraded =
                         request_upgraded.await.expect("failed to upgrade request");
 
