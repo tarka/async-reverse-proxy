@@ -8,9 +8,10 @@ use hyper::http::header::{InvalidHeaderValue, ToStrError};
 use hyper::http::uri::InvalidUri;
 use hyper::upgrade::OnUpgrade;
 use hyper::{Body, Client, Error, Request, Response, StatusCode};
+use realm_io::bidi_copy;
 use std::net::IpAddr;
 use std::sync::LazyLock;
-use tokio::io::copy_bidirectional;
+//use tokio::io::copy_bidirectional;
 
 static TE_HEADER: LazyLock<HeaderName> =
     LazyLock::new(|| HeaderName::from_static("te"));
@@ -322,7 +323,9 @@ pub async fn call<'a, T: hyper::client::connect::Connect + Clone + Send + Sync +
                     let mut request_upgraded =
                         request_upgraded.await.expect("failed to upgrade request");
 
-                    copy_bidirectional(&mut response_upgraded, &mut request_upgraded)
+                    // TODO: There are linux zero-copy versions of
+                    // this we could use.
+                    bidi_copy(&mut response_upgraded, &mut request_upgraded)
                         .await
                         .expect("coping between upgraded connections failed");
                 });
