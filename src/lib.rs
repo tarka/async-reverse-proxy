@@ -4,6 +4,7 @@
 extern crate tracing;
 
 use cfg_if::cfg_if;
+use hyper::client::connect::Connect;
 use hyper::header::{HeaderMap, HeaderName, HeaderValue, HOST};
 use hyper::http::header::{InvalidHeaderValue, ToStrError};
 use hyper::http::uri::InvalidUri;
@@ -369,11 +370,15 @@ pub async fn call<'a, T: hyper::client::connect::Connect + Clone + Send + Sync +
     }
 }
 
-pub struct ReverseProxy<T: hyper::client::connect::Connect + Clone + Send + Sync + 'static> {
+pub struct ReverseProxy<T>
+where T: Connect + Clone + Send + Sync + 'static
+{
     client: Client<T>,
 }
 
-impl<T: hyper::client::connect::Connect + Clone + Send + Sync + 'static> ReverseProxy<T> {
+impl<T> ReverseProxy<T>
+where T: Connect + Clone + Send + Sync + 'static
+{
     pub fn new(client: Client<T>) -> Self {
         Self { client }
     }

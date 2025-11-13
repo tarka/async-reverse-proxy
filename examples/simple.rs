@@ -8,9 +8,11 @@ use std::sync::LazyLock;
 use std::{convert::Infallible, net::SocketAddr};
 
 static PROXY_CLIENT: LazyLock<ReverseProxy<RustlsHttpsConnector>> = LazyLock::new(|| {
-    ReverseProxy::new(
-        hyper::Client::builder().build::<_, hyper::Body>(TrustDnsResolver::default().into_rustls_webpki_https_connector()),
-    )
+    let resolver = TrustDnsResolver::default()
+        .into_rustls_webpki_https_connector();
+    let client = hyper::Client::builder()
+        .build::<_, hyper::Body>(resolver);
+    ReverseProxy::new(client)
 });
 
 fn debug_request(req: &Request<Body>) -> Result<Response<Body>, Infallible> {
